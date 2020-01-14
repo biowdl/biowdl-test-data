@@ -1,23 +1,36 @@
 
-rule download_hg38_chromosome_x:
+rule download_hg38_chromosome:
     params:
         # Download the GRCh38 genome hard-masked from ensembl.
-        url="ftp://ftp.ensembl.org/pub/release-98/fasta/homo_sapiens/dna/Homo_sapiens.GRCh38.dna.chromosome.X.fa.gz"
+        url="ftp://ftp.ensembl.org/pub/release-98/fasta/homo_sapiens/dna/Homo_sapiens.GRCh38.{chrom}.fa.gz"
     output:
-        "temp/Homo_sapiens.GRCh38.dna.chromosome.X.fa.gz"
+        "temp/Homo_sapiens.GRCh38.{chrom}.fa.gz"
     singularity:
         # Curl 7.68.0. Unfortunately a wget container was not available
         "docker://curlimages/curl@sha256:99a8e9629b3ae26efb977e1a98f4786d6bd730c5ab4dea64632e297d7c3e7151"
     shell:
         "curl -o {output} {params.url}"
 
-rule
-
-rule unpack_reference:
+rule concatenate_ref_genome:
     input:
-        "temp/GRCh38.fa.gz"
+        "temp/Homo_sapiens.GRCh38.dna.chromosome.22.fa.gz"
+        "temp/Homo_sapiens.GRCh38.dna.chromosome.X.fa.gz",
+        "temp/Homo_sapiens.GRCh38.dna.chromosome.Y.fa.gz",
     output:
-        "temp/GRCh38.fa"
+        "temp/22XY.fa"
+    singularity:
+        # Debian:buster-slim pinned at a hash.
+        "docker://debian@sha256:a467ec784be2fa9d9e1868c4bf0c5c5792750453db3e5cd1d726a7243536a54f"
+    shell:
+        "gzip -cd {input} > {output}"
+
+rule concatenate_masked_ref_genome:
+    input:
+        "temp/Homo_sapiens.GRCh38.dna_rm.chromosome.22.fa.gz"
+        "temp/Homo_sapiens.GRCh38.dna_rm.chromosome.X.fa.gz",
+        "temp/Homo_sapiens.GRCh38.dna_rm.chromosome.Y.fa.gz",
+    output:
+        "temp/22XY_masked.fa"
     singularity:
         # Debian:buster-slim pinned at a hash.
         "docker://debian@sha256:a467ec784be2fa9d9e1868c4bf0c5c5792750453db3e5cd1d726a7243536a54f"
