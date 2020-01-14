@@ -19,7 +19,7 @@ rule concatenate_ref_genome:
         "GRCh38/Homo_sapiens.GRCh38.dna.chromosome.X.fa.gz",
         "GRCh38/Homo_sapiens.GRCh38.dna.chromosome.Y.fa.gz",
     output:
-        "temp/22XY_full.fa"
+        "temp/22XY_unmasked.fa"
     singularity:
         # Debian:buster-slim pinned at a hash.
         "docker://debian@sha256:a467ec784be2fa9d9e1868c4bf0c5c5792750453db3e5cd1d726a7243536a54f"
