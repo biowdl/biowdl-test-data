@@ -50,3 +50,8 @@ rule create_small_reference:
     shell:
          "bedtools getfasta -fi {input.hg38} -bed {input.bed} -fo {output}"
 
+rule create_sample_data:
+    input:
+         hg38="reference_unmasked.fa",
+         vcf="mutations.vcf",
+         ploidy_file={sample}.ploidy
