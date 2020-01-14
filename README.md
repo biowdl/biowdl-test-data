@@ -1,2 +1,4 @@
-# test-data
-Reproducible and reusable test data for the BioWDL project.
+# biowdl-test-data
+
+Reproducible and reusable test data for bioinformatics projects. 
+
