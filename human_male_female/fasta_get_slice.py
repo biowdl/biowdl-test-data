@@ -27,27 +27,27 @@ from Bio.SeqIO.FastaIO import FastaIterator
 
 def argument_parser() -> argparse.ArgumentParser():
     parser = argparse.ArgumentParser(
-        description="Get the nucleotide at a given position in a fasta")
+        description="Get the slice at a given positions in a fasta")
     parser.add_argument("fasta", type=str, help="the fasta file")
     parser.add_argument("chromosome", type=str, help="chromosome")
-    parser.add_argument("position", type=int, help="1-based position")
+    parser.add_argument("start", type=int, help="0-based position")
+    parser.add_argument("end", type=int, help="0-based position")
     return parser
 
 
-def get_base(fasta: str, chromosome: str, position: int):
+def get_base(fasta: str, chromosome: str, start: int, end: int):
     with open(fasta, "rt") as fasta_handle:
         records = FastaIterator(fasta_handle)
         for record in records:
-            print(len(record))
             if record.id == chromosome:
-                return record[position - 1]
+                return record[start:end]
         # If we have not returned the chromosome was not there.
         raise ValueError(f"{chromosome} not found in {fasta}")
 
 
 def main():
     args = argument_parser().parse_args()
-    print(get_base(args.fasta, args.chromosome, args.position))
+    print(get_base(args.fasta, args.chromosome, args.start, args.end))
 
 
 if __name__ == "__main__":
