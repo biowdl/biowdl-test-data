@@ -1,11 +1,26 @@
 ##fileformat=VCFv4.1
 ##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
-##contig=<ID=chr1,length=21>
-##contig=<ID=chrX,length=12>
-##contig=<ID=chrY,length=6>
+##contig=<ID=chr22,length=10000>
+##contig=<ID=chrX,length=10000>
+##contig=<ID=chrY,length=10000>
 #CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	male	female
-chr1	4	.	T	A,C,G	.	.	.	GT	1/2/3
-chr1	7	.	A	T	.	.	.	GT	0/1/0
-chrX	1	.	A	T	.	.	.	GT	0/1
-chrX	2	.	G	T	.	.	.	GT	0/0
-chrY	4	.	A	C	.	.	.	GT	1
+22	500	.	T	A	.	.	.	GT	0|0	1|2
+22	1000	.	T	C	.	.	.	GT	0|1	1|2
+22	1500	.	T	A	.	.	.	GT	1|0	1|2
+22	2000	.	T	C	.	.	.	GT	1|1	
+22	2500	.	T	A	.	.	.	GT	0|0
+22	3000	.	T	C	.	.	.	GT	0|1
+22	3500	.	T	A	.	.	.	GT	1|0
+22	4000	.	T	C	.	.	.	GT	1|1
+22	4500	.	T	A	.	.	.	GT	0|0
+22	5000	.	T	C	.	.	.	GT	0|1
+22	5500	.	T	A	.	.	.	GT	1|0
+22	6000	.	T	C	.	.	.	GT	1|1
+22	6500	.	T	A	.	.	.	GT	0|0
+22	7000	.	T	C	.	.	.	GT	0/1
+22	7500	.	T	A	.	.	.	GT	1/0
+22	8000	.	T	C	.	.	.	GT	1/1
+22	8500	.	T	A	.	.	.	GT	1|2
+22	9000	.	T	C	.	.	.	GT	1|2
+22	9500	.	T	A	.	.	.	GT	1|2
+22	10000	.	T	C	.	.	.	GT	1|2
