@@ -36,12 +36,12 @@ def argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("source", type=str,
                         help="which region is translocated. In the following "
                              "format: {CHR}:{START}-{END}. For example: "
-                             "chr1:1-20000. Positions are 1-based")
+                             "chr1:1-20000. Positions are 0-based")
     parser.add_argument("target", type=str,
                         help="Target location on receiving chromosome. In the "
                              "following format: {CHR}:{START}-{END}. For "
                              "example: chr2:123200-123500. Positions are "
-                             "1-based. This region will be replaced with src's "
+                             "0-based. This region will be replaced with src's "
                              "sequence.")
     return parser
 
@@ -59,7 +59,7 @@ class Position(NamedTuple):
         except ValueError:
             raise ValueError(f"Could not parse {string}. Is it in "
                              f"CHR:START-END format?")
-        return cls(chromosome, start, end)
+        return cls(chromosome, int(start), int(end))
 
 
 def mutate(genome: Iterable[SeqRecord], source: Position, target: Position
@@ -69,7 +69,7 @@ def mutate(genome: Iterable[SeqRecord], source: Position, target: Position
     original_target = None
     for chromosome in genome:
         if chromosome.id == source.chromosome:
-            source_seq = str(chromosome.seq)[source.start - 1: source.end]
+            source_seq = str(chromosome.seq)[source.start: source.end]
         elif chromosome.id == target.chromosome:
             original_target_seq = str(chromosome.seq)
             original_target = chromosome
@@ -98,7 +98,7 @@ def main():
     with open(args.fasta, "rt") as fasta_h:
         records = FastaIterator(fasta_h)
         result = mutate(records, source, target)
-    print(result.format("fasta"))
+    print(result.format("fasta"), end='')
 
 
 if __name__ == "__main__":
