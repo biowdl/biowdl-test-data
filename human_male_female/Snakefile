@@ -6,12 +6,10 @@ rule download_hg38_chromosome:
     output:
         "GRCh38/Homo_sapiens.GRCh38.{chrom}.fa.gz"
     singularity:
-        # Curl 7.68.0. Unfortunately a wget container was not available
-        #"docker://curlimages/curl@sha256:99a8e9629b3ae26efb977e1a98f4786d6bd730c5ab4dea64632e297d7c3e7151"
-        # Contains both wget and bash
-        "docker://shiva117/wgetubuntu@sha256:c5ad3f4edd64aef76fb99af7eb83b2f13108f57e095072aa7afd95adcfa6fdd4"
+        # Contains curl based on debian-slim
+        "docker://biowdl/curl@sha256:3b0477d934547d8c274c9834372e791342d2a97409eedde40e786c7782721f53"
     shell:
-        "wget -O {output} {params.url}"
+        "curl -s -o {output} {params.url}"
 
 rule concatenate_ref_genome:
     input:
@@ -19,20 +17,7 @@ rule concatenate_ref_genome:
         "GRCh38/Homo_sapiens.GRCh38.dna.chromosome.X.fa.gz",
         "GRCh38/Homo_sapiens.GRCh38.dna.chromosome.Y.fa.gz",
     output:
-        "temp/22XY_unmasked.fa"
-    singularity:
-        # Debian:buster-slim pinned at a hash.
-        "docker://debian@sha256:a467ec784be2fa9d9e1868c4bf0c5c5792750453db3e5cd1d726a7243536a54f"
-    shell:
-        "gzip -cd {input} > {output}"
-
-rule concatenate_masked_ref_genome:
-    input:
-        "GRCh38/Homo_sapiens.GRCh38.dna_rm.chromosome.22.fa.gz",
-        "GRCh38/Homo_sapiens.GRCh38.dna_rm.chromosome.X.fa.gz",
-        "GRCh38/Homo_sapiens.GRCh38.dna_rm.chromosome.Y.fa.gz",
-    output:
-        "temp/22XY_masked.fa"
+        "temp/22XY.fa"
     singularity:
         # Debian:buster-slim pinned at a hash.
         "docker://debian@sha256:a467ec784be2fa9d9e1868c4bf0c5c5792750453db3e5cd1d726a7243536a54f"
@@ -41,19 +26,19 @@ rule concatenate_masked_ref_genome:
 
 rule create_small_reference:
     input:
-        hg38="temp/22XY{masked}.fa",
+        hg38="temp/22XY.fa",
         bed="extract.bed"
     output:
-         "reference{masked}.fa"
+         "reference.fa"
     singularity:
         "docker://quay.io/biocontainers/bedtools:2.29.2--hc088bd4_0"
     shell:
-         "bedtools getfasta -fi {input.hg38} -bed {input.bed} -fo {output}"
+         "bedtools getfasta -fi {input.hg38} -bed {input.bed} -fo {output} 2> /dev/null"
 
-rule create_sample_data:
-    input:
-         hg38="reference_unmasked.fa",
-         vcf="mutations.vcf",
-         ploidy_file="{sample}.ploidy"
-    output:
-        "{sample}.fa"
+# rule create_sample_data:
+#     input:
+#          hg38="reference_unmasked.fa",
+#          vcf="mutations.vcf",
+#          ploidy_file="{sample}.ploidy"
+#     output:
+#         "{sample}/{sample}.fa"
