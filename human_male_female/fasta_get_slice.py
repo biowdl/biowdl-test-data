@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 import argparse
+from typing import Optional
 
 from Bio.SeqIO.FastaIO import FastaIterator
 
@@ -31,22 +32,26 @@ def argument_parser() -> argparse.ArgumentParser():
     parser.add_argument("fasta", type=str, help="the fasta file")
     parser.add_argument("chromosome", type=str, help="chromosome")
     parser.add_argument("start", type=int, help="0-based position")
-    parser.add_argument("end", type=int, help="0-based position")
+    parser.add_argument("end", type=int, nargs="?", help="0-based position")
     return parser
 
 
-def get_base(fasta: str, chromosome: str, start: int, end: int):
+def get_base(fasta: str, chromosome: str, start: int, end: Optional[int]):
+    if end is None:
+        end = start + 1
+
     with open(fasta, "rt") as fasta_handle:
         records = FastaIterator(fasta_handle)
         for record in records:
             if record.id == chromosome:
-                return record[start:end]
+                return record[start:end].seq
         # If we have not returned the chromosome was not there.
         raise ValueError(f"{chromosome} not found in {fasta}")
 
 
 def main():
     args = argument_parser().parse_args()
+    end = args.end if args.end else None
     print(get_base(args.fasta, args.chromosome, args.start, args.end))
 
 
