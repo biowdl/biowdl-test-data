@@ -1,3 +1,12 @@
+CONTAINERS = {
+    # Contains curl based on debian-slim
+    "curl": "docker://biowdl/curl@sha256:3b0477d934547d8c274c9834372e791342d2a97409eedde40e786c7782721f53",
+    # Debian:buster-slim pinned at a hash.
+    "debian": "docker://debian@sha256:a467ec784be2fa9d9e1868c4bf0c5c5792750453db3e5cd1d726a7243536a54f",
+    # Bedtools 2.29 does weird things to the name of the contig. 2.27 acts normally.
+    "bedtools": "docker://quay.io/biocontainers/bedtools:2.27.1--he860b03_3",
+    "biopython": "docker://quay.io/biocontainers/biopython:1.70--np112py36_1"
+}
 
 rule download_hg38_chromosome:
     params:
@@ -6,8 +15,7 @@ rule download_hg38_chromosome:
     output:
         "GRCh38/Homo_sapiens.GRCh38.{chrom}.fa.gz"
     singularity:
-        # Contains curl based on debian-slim
-        "docker://biowdl/curl@sha256:3b0477d934547d8c274c9834372e791342d2a97409eedde40e786c7782721f53"
+        CONTAINERS["curl"]
     shell:
         "curl -s -o {output} {params.url}"
 
@@ -19,28 +27,68 @@ rule concatenate_ref_genome:
     output:
         "temp/22XY.fa"
     singularity:
-        # Debian:buster-slim pinned at a hash.
-        "docker://debian@sha256:a467ec784be2fa9d9e1868c4bf0c5c5792750453db3e5cd1d726a7243536a54f"
+        CONTAINERS["debian"]
     shell:
         "gzip -cd {input} > {output}"
 
-rule create_small_reference:
+rule create_raw_small_reference:
     input:
         hg38="temp/22XY.fa",
         bed="extract.bed"
     output:
-         "reference.fa"
+         "temp/reference_raw.fa"
     singularity:
-        # Bedtools 2.29 does weird things to the name of the contig. 2.27 acts normally.
-        "docker://quay.io/biocontainers/bedtools:2.27.1--he860b03_3"
+        CONTAINERS["bedtools"]
     shell:
          # Use -name to get the name from the bed file.
          "bedtools getfasta -name -fi {input.hg38} -bed {input.bed} "
          "> {output}"
 
+rule create_formatted_reference:
+    input:
+        "temp/reference_raw.fa"
+    output:
+        "reference.fa"
+    singularity:
+        CONTAINERS["biopython"]
+    shell:
+        "python select_chromosomes.py {input} > {output}"
+
+rule create_unmasked_y:
+    input:
+        "reference.fa"
+    output:
+        "temp/unmasked_y.fa"
+    singularity:
+        CONTAINERS["biopython"]
+    shell:
+        "python translocate.py {input} X:0-5000 Y:0-5000 > {output}"
+
+rule select_22_and_x:
+    input:
+        "temp/reference_raw.fa"
+    output:
+        "temp/22_and_x.fa"
+    singularity:
+        CONTAINERS["biopython"]
+    shell:
+        "python select_chromosomes.py {input} 22 X > {output}"
+
+rule create_reference_unmasked_y:
+    input:
+        "temp/22_and_x.fa",
+         "temp/unmasked_y.fa"
+    output:
+        "temp/reference_unmasked_y.fa"
+    singularity:
+        CONTAINERS["debian"]
+    shell:
+        "cat {input} > {output}"
+
+
 # rule create_sample_data:
 #     input:
-#          hg38="reference_unmasked.fa",
+#          hg38="temp/reference_unmasked_y.fa",
 #          vcf="mutations.vcf",
 #          ploidy_file="{sample}.ploidy"
 #     output:
