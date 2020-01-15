@@ -31,11 +31,12 @@ rule create_small_reference:
     output:
          "reference.fa"
     singularity:
-        "docker://quay.io/biocontainers/bedtools:2.29.2--hc088bd4_0"
+        # Bedtools 2.29 does weird things to the name of the contig. 2.27 acts normally.
+        "docker://quay.io/biocontainers/bedtools:2.27.1--he860b03_3"
     shell:
-         # Use -name to get the original name.
+         # Use -name to get the name from the bed file.
          "bedtools getfasta -name -fi {input.hg38} -bed {input.bed} "
-         "-fo {output} 2> /dev/null"
+         "> {output}"
 
 # rule create_sample_data:
 #     input:
