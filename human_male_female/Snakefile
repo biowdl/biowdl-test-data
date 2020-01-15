@@ -11,7 +11,7 @@ rule download_hg38_chromosome:
         # Contains both wget and bash
         "docker://shiva117/wgetubuntu@sha256:c5ad3f4edd64aef76fb99af7eb83b2f13108f57e095072aa7afd95adcfa6fdd4"
     shell:
-        "curl -o {output} {params.url}"
+        "wget -O {output} {params.url}"
 
 rule concatenate_ref_genome:
     input:
@@ -46,7 +46,7 @@ rule create_small_reference:
     output:
          "reference{masked}.fa"
     singularity:
-        "docker://quay.io/biocontainers/bedtools:"
+        "docker://quay.io/biocontainers/bedtools:2.29.2--hc088bd4_0"
     shell:
          "bedtools getfasta -fi {input.hg38} -bed {input.bed} -fo {output}"
 
@@ -54,4 +54,6 @@ rule create_sample_data:
     input:
          hg38="reference_unmasked.fa",
          vcf="mutations.vcf",
-         ploidy_file={sample}.ploidy
+         ploidy_file="{sample}.ploidy"
+    output:
+        "{sample}.fa"
