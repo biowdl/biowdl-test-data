@@ -33,7 +33,9 @@ rule create_small_reference:
     singularity:
         "docker://quay.io/biocontainers/bedtools:2.29.2--hc088bd4_0"
     shell:
-         "bedtools getfasta -fi {input.hg38} -bed {input.bed} -fo {output} 2> /dev/null"
+         # Use -name to get the original name.
+         "bedtools getfasta -name -fi {input.hg38} -bed {input.bed} "
+         "-fo {output} 2> /dev/null"
 
 # rule create_sample_data:
 #     input:
