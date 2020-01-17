@@ -142,9 +142,7 @@ rule index_reference:
     singularity:
         CONTAINERS["bwa"]
     shell:
-        "bwa index -p {output} {input} && "
-        # Create link to create 'output file' for prefix
-        "ln -s {input} {output}"
+        "bwa index -p bwa_index/reference.fa {input}"
 
 rule align_reads:
     input:
@@ -171,5 +169,3 @@ rule align_reads:
          "OUTPUT={output.bam} "
          "SORT_ORDER=coordinate "
          "CREATE_INDEX=true"
-
-
