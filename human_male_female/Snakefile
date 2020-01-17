@@ -127,7 +127,7 @@ rule gzip_generated_fastq:
     input:
         "{sample}/{sample}.bwa.read{number}.fastq"
     output:
-          "{sample}/{sample}.bwa.read{number}.fastq.gz"
+          "{sample}/{sample}_R{number}.fastq.gz"
     singularity:
         CONTAINERS["debian"]
     shell:
@@ -150,8 +150,8 @@ rule index_reference:
 
 rule align_reads:
     input:
-         R1="{sample}/{sample}.bwa.read1.fastq.gz",
-         R2="{sample}/{sample}.bwa.read2.fastq.gz",
+         R1="{sample}/{sample}_R1.fastq.gz",
+         R2="{sample}/{sample}_R2.fastq.gz",
          index_files=["bwa_index/reference.fa.amb",
                       "bwa_index/reference.fa.ann",
                       "bwa_index/reference.fa.bwt",
