@@ -7,7 +7,9 @@ CONTAINERS = {
     "bedtools": "docker://quay.io/biocontainers/bedtools:2.27.1--he860b03_3",
     "biopython": "docker://quay.io/biocontainers/biopython:1.70--np112py36_1",
     # Use custom container now until biocontainer becomes available.
-    "biotdg": "docker://biowdl/biotdg:0.1.0"
+    "biotdg": "docker://biowdl/biotdg:0.1.0",
+    # Use a container with BWA and picard
+    "bwa": "docker://quay.io/biocontainers/mulled-v2-002f51ea92721407ef440b921fb5940f424be842:43ec6124f9f4f875515f9548733b8b4e5fed9aa6-0"
 }
 
 rule download_hg38_chromosome:
@@ -112,3 +114,60 @@ rule create_sample_data:
          "-E 0.001 "
          "-n 5"
 
+rule gzip_generated_fastq:
+    input:
+        "{sample}/{sample}.bwa.read{number}.fastq"
+    output:
+          "{sample}/{sample}.bwa.read{number}.fastq.gz"
+    singularity:
+        CONTAINERS["debian"]
+    shell:
+         # Use -n flag so timestamp is not included for reproducibility.
+         "gzip -n -c {input} > {output}"
+
+rule index_reference:
+    input:
+        "reference.fa"
+    output:
+        "bwa_index/reference.fa.amb",
+        "bwa_index/reference.fa.ann",
+        "bwa_index/reference.fa.bwt",
+        "bwa_index/reference.fa.pac",
+        "bwa_index/reference.fa.sa",
+    singularity:
+        CONTAINERS["bwa"]
+    shell:
+        "bwa index -p {output} {input} && "
+        # Create link to create 'output file' for prefix
+        "ln -s {input} {output}"
+
+rule align_reads:
+    input:
+         R1="{sample}/{sample}.bwa.read1.fastq.gz",
+         R2="{sample}/{sample}.bwa.read2.fastq.gz",
+         index_files=["bwa_index/reference.fa.amb",
+                      "bwa_index/reference.fa.ann",
+                      "bwa_index/reference.fa.bwt",
+                      "bwa_index/reference.fa.pac",
+                      "bwa_index/reference.fa.sa"]
+    output:
+          bam="{sample}/{sample}.bam",
+          bai="{sample}/{sample}.bai"
+    params:
+        readgroup_header=r"@RG\tID:{sample}-lib1-rg1\tLB:lib1"
+                         r"\tSM:{sample}\tPL:illumina",
+    singularity:
+        CONTAINERS["bwa"]
+    shell:
+         "bwa mem "
+         "-R '{params.readgroup_header}' "
+         "bwa_index/reference.fa {input.R1} {input.R2} | "
+         "picard SortSam INPUT=/dev/stdin "
+         "OUTPUT={output.bam} "
+         "SORT_ORDER=coordinate "
+         "CREATE_INDEX=true"
+
+rule all:
+    input:
+         "male/male.bam",
+         "female/female.bam"
