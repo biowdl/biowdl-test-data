@@ -7,7 +7,7 @@ CONTAINERS = {
     "bedtools": "docker://quay.io/biocontainers/bedtools:2.27.1--he860b03_3",
     "biopython": "docker://quay.io/biocontainers/biopython:1.70--np112py36_1",
     # Use custom container now until biocontainer becomes available.
-    "biotdg": "docker://biowdl/biotdg@sha256:d58b9a2be17aa68b9a28258551d2d569d0f72baa5069a07ef883e53ccafda469"
+    "biotdg": "docker://biowdl/biotdg:0.1.0"
 }
 
 rule download_hg38_chromosome:
@@ -92,9 +92,11 @@ rule create_sample_data:
     input:
          hg38="temp/reference_unmasked_y.fa",
          vcf="mutations.vcf",
-         ploidy_file="{sample}.ploidy"
+         ploidy_file="{sample}.ploidy.tsv"
     output:
-        "{sample}/{sample}.fasta"
+        "{sample}/{sample}.fasta",
+        "{sample}/{sample}.bwa.read1.fastq",
+        "{sample}/{sample}.bwa.read2.fastq"
     singularity:
         CONTAINERS["biotdg"]
     shell:
@@ -102,11 +104,11 @@ rule create_sample_data:
          "--reference {input.hg38} "
          "--vcf {input.vcf} "
          "-p {input.ploidy_file} "
-         "-s {sample} "
-         "-o {sample}/ "
+         "-s {wildcards.sample} "
+         "-o {wildcards.sample}/ "
          "-l 150 "
          "-C 50 "
          "-e 0.001 "
          "-E 0.001 "
-         "-N 5"
+         "-n 5"
 

@@ -1,8 +1,8 @@
 ##fileformat=VCFv4.1
 ##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
-##contig=<ID=chr22,length=10000>
-##contig=<ID=chrX,length=10000>
-##contig=<ID=chrY,length=10000>
+##contig=<ID=22,length=10000>
+##contig=<ID=X,length=10000>
+##contig=<ID=Y,length=10000>
 #CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	female	male
 22	500	.	T	A	.	.	.	GT	0|0	1|0
 22	1000	.	A	C	.	.	.	GT	0|1	1|1
