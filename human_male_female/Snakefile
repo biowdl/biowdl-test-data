@@ -12,6 +12,11 @@ CONTAINERS = {
     "bwa": "docker://quay.io/biocontainers/mulled-v2-002f51ea92721407ef440b921fb5940f424be842:43ec6124f9f4f875515f9548733b8b4e5fed9aa6-0"
 }
 
+rule all:
+    input:
+         "male/male.bam",
+         "female/female.bam"
+
 rule download_hg38_chromosome:
     params:
         # Download the GRCh38 genome hard-masked from ensembl.
@@ -167,7 +172,4 @@ rule align_reads:
          "SORT_ORDER=coordinate "
          "CREATE_INDEX=true"
 
-rule all:
-    input:
-         "male/male.bam",
-         "female/female.bam"
+
