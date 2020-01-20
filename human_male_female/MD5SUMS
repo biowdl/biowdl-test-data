@@ -15,3 +15,6 @@ bf6f91db8644676695b2dc7ac4ed3a4c  female/female.bam
 f0902d405d9a8ea6fb75f5b7a79121bf  male/male.bam
 1b2b38924bfc1f939f1173cb10834800  male/male_R1.fastq.gz
 47373e0cfe6bd73850f2327cbcd096e7  male/male_R2.fastq.gz
+eb321ecd19ebe81ea0c8b88a969cd5fd  GRCh38/Homo_sapiens.GRCh38.dna.chromosome.22.fa.gz
+974059b6a79eeed96ccc8ee9d36d9e8e  GRCh38/Homo_sapiens.GRCh38.dna.chromosome.X.fa.gz
+c4d00789488f974a30f9bdf80718940b  GRCh38/Homo_sapiens.GRCh38.dna.chromosome.Y.fa.gz
