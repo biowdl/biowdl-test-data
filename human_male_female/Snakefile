@@ -56,7 +56,7 @@ rule create_raw_small_reference:
 
 rule create_formatted_reference:
     input:
-        temp("temp/reference_raw.fa")
+        "temp/reference_raw.fa"
     output:
         "reference.fa"
     singularity:
