@@ -49,11 +49,11 @@ Y	1000	.	G	C	.	.	.	GT	.	1
 Y	1500	.	A	T	.	.	.	GT	.	1
 Y	2000	.	C	A	.	.	.	GT	.	0
 Y	2500	.	G	C	.	.	.	GT	.	0
-Y	3000	.	T	C	.	.	.	GT	.	1
+Y	3000	.	T	A	.	.	.	GT	.	1
 Y	3500	.	C	A	.	.	.	GT	.	0
 Y	4000	.	C	G	.	.	.	GT	.	1
 Y	4500	.	T	A	.	.	.	GT	.	1
-Y	5000	.	A	T	.	.	.	GT	.	0
+Y	5000	.	A	T	.	.	.	GT	.	1
 Y	5500	.	C	G	.	.	.	GT	.	1
 Y	6000	.	T	C	.	.	.	GT	.	0
 Y	6500	.	A	G	.	.	.	GT	.	1
