@@ -53,4 +53,6 @@ Test data creation process
   <https://github.com/biowdl/biotdg>`_ programm reads were created for the male
   and female sample.
 + Using BWA the fastq reads were aligned to reference.fa
-
++ ``expected.vcf`` was created by hand to match the hand-created ``mutations.vcf``.
+  The variants at the end of chromosomes have been
+  removed from ``expected.vcf``
