@@ -9,13 +9,17 @@ CONTAINERS = {
     # Use custom container now until biocontainer becomes available.
     "biotdg": "docker://biowdl/biotdg:0.1.0",
     # Use a container with BWA and picard
-    "bwa": "docker://quay.io/biocontainers/mulled-v2-002f51ea92721407ef440b921fb5940f424be842:43ec6124f9f4f875515f9548733b8b4e5fed9aa6-0"
+    "bwa": "docker://quay.io/biocontainers/mulled-v2-002f51ea92721407ef440b921fb5940f424be842:43ec6124f9f4f875515f9548733b8b4e5fed9aa6-0",
+    "samtools": "docker://quay.io/biocontainers/samtools:1.2-0",
+    "picard": "docker://quay.io/biocontainers/picard:2.21.6--0"
 }
 
 rule all:
     input:
          "male/male.bam",
-         "female/female.bam"
+         "female/female.bam",
+         "reference.fa.fai",
+         "reference.dict"
 
 rule download_hg38_chromosome:
     params:
@@ -63,6 +67,28 @@ rule create_formatted_reference:
         CONTAINERS["biopython"]
     shell:
         "python select_chromosomes.py {input} > {output}"
+
+rule create_reference_fasta_index:
+    input:
+        "reference.fa"
+    output:
+        "reference.fa.fai"
+    singularity:
+        CONTAINERS["samtools"]
+    shell:
+        "samtools faidx {input}"
+
+rule create_reference_sequence_dict:
+    input:
+        "reference.fa"
+    output:
+        "reference.dict"
+    singularity:
+        CONTAINERS["picard"]
+    shell:
+        "picard CreateSequenceDictionary "
+        "R={input} O={output} "
+        "URI={input}"
 
 rule create_unmasked_y:
     input:

@@ -15,3 +15,5 @@ bf6f91db8644676695b2dc7ac4ed3a4c  female/female.bam
 f0902d405d9a8ea6fb75f5b7a79121bf  male/male.bam
 1b2b38924bfc1f939f1173cb10834800  male/male_R1.fastq.gz
 47373e0cfe6bd73850f2327cbcd096e7  male/male_R2.fastq.gz
+d5256794a6440dc88d1a2e431d58ed63  reference.fa.fai
+9b20a36739f4820c2b146a117f324957  reference.dict
