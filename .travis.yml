@@ -37,4 +37,6 @@ matrix:
   include:
     - env: TEST_DATA=human_male_female
       before_install:
+        # Necessary to write protect all files that need to be downloaded.
+        # Downloading files in CI can cause intermittent issues.
         - bash -c 'chmod 444 human_male_female/GRCh38/*'
