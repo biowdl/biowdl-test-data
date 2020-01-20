@@ -22,11 +22,13 @@ install:
   - sudo pip3 install snakemake
 
 script:
+  # Delete all data and recreate again with snakemake.
   - >-
     bash -c 'cd $TEST_DATA &&
     snakemake --delete-all-output &&
     snakemake --use-singularity --singularity-args \'-C\'
     '
+  # Check if things have changed. This should not be the case with reproducible data.
   - git diff --exit-code
   - bash -c 'cd $TEST_DATA && md5sum -c MD5SUMS'
 
