@@ -1,0 +1,33 @@
+language: go
+go:
+  - "1.x"
+
+dist: bionic
+install:
+  - sudo apt update
+  - >-
+    sudo apt install build-essential uuid-dev libgpgme-dev squashfs-tools
+    libseccomp-dev wget pkg-config git cryptsetup-bin
+  - >-
+    bash -c '
+    export VERSION=3.5.2 &&
+    wget https://github.com/sylabs/singularity/releases/download/v${VERSION}/singularity-${VERSION}.tar.gz &&
+    tar -xzf singularity-${VERSION}.tar.gz &&
+    cd singularity &&
+    ./mconfig &&
+    make -C ./builddir &&
+    sudo make -C ./builddir install
+    '
+  - sudo apt install python3 python3-pip
+  - sudo pip3 install snakemake
+
+script:
+  - >-
+    bash -c 'cd $TEST_DATA &&
+    snakemake --delete-all-output &&
+    snakemake --use-singularity --singularity-args \'-C\'
+  - git diff --exit-code
+  - bash -c 'cd $TEST_DATA && md5sums -c MD5SUMS'
+
+env:
+  - TEST_DATA=human_male_female
