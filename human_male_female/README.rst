@@ -26,6 +26,8 @@ Files for testing
 
 Files involved in test-data creation
 ------------------------------------
++ ``GRCh38`` this folders contains chromosome 22, X and Y downloaded from
+  ensembl. These are the GRCh38 build release 98.
 + ``extract.bed``: The regions from hg38 that were used to create
   ``reference.fa``.
 + ``female.ploidy.tsv``: ploidy for each chromosome in the female sample.
