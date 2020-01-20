@@ -11,7 +11,8 @@ CONTAINERS = {
     # Use a container with BWA and picard
     "bwa": "docker://quay.io/biocontainers/mulled-v2-002f51ea92721407ef440b921fb5940f424be842:43ec6124f9f4f875515f9548733b8b4e5fed9aa6-0",
     "samtools": "docker://quay.io/biocontainers/samtools:1.2-0",
-    "picard": "docker://quay.io/biocontainers/picard:2.21.6--0"
+    "picard": "docker://quay.io/biocontainers/picard:2.21.6--0",
+    "tabix": "docker://quay.io/biocontainers/tabix:0.2.6--ha92aebf_0"
 }
 
 rule all:
@@ -19,7 +20,8 @@ rule all:
          "male/male.bam",
          "female/female.bam",
          "reference/reference.fa.fai",
-         "reference/reference.dict"
+         "reference/reference.dict",
+         "expected.vcf.gz.tbi"
 
 rule download_hg38_chromosome:
     params:
@@ -199,3 +201,23 @@ rule align_reads:
          "OUTPUT={output.bam} "
          "SORT_ORDER=coordinate "
          "CREATE_INDEX=true"
+
+rule block_gzip:
+    input:
+         "{uncompressed}"
+    output:
+         "{uncompressed}.gz"
+    singularity:
+         CONTAINERS["tabix"]
+    shell:
+         "bgzip -c {input} > {output}"
+
+rule tabix:
+    input:
+        "{notindexed}"
+    output:
+        "{notindexed}.tbi"
+    singularity:
+         CONTAINERS["tabix"]
+    shell:
+         "tabix -p vcf {input}"
