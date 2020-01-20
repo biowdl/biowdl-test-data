@@ -26,7 +26,8 @@ script:
   - >-
     bash -c "cd $TEST_DATA &&
     snakemake --delete-all-output &&
-    snakemake --use-singularity --singularity-args \'-C\'
+    snakemake --use-singularity --singularity-args \'-C\' --show-failed-logs
+    --printshellcmds
     "
   # Check if things have changed. This should not be the case with reproducible data.
   - git diff --exit-code
