@@ -37,4 +37,4 @@ matrix:
   include:
     - env: TEST_DATA=human_male_female
       before_install:
-        - bash -c 'chmod 444 human_male_female/*'
+        - bash -c 'chmod 444 human_male_female/GRCh38/*'
