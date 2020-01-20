@@ -17,3 +17,5 @@ b48cd7a8bd24f68ca37b8da2fe145bea  female/female.bai
 bf4793c104fce934e36d1104a100fa49  female/female.bam
 f2ff1e357f2860b68b69931360f8be8c  female/female_R1.fastq.gz
 99e3cf06a655794b289852bf35bfd4cf  female/female_R2.fastq.gz
+1a98fe16a9ce30dbfa0a5eee582d6793  expected.vcf.gz
+3da02ca0fb1f3b9b380a813d3e34c682  expected.vcf.gz.tbi
