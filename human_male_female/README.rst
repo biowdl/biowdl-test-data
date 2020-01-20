@@ -10,8 +10,8 @@ Files
 Files for testing
 -----------------
 
-+ ``reference.fa``: A reference genome. With chromosomes ``22``, ``X`` and
-  ``Y``.
++ ``reference``: A folder containing a reference genome. With chromosomes ``22``, ``X`` and
+  ``Y``. Fasta index and sequence dictionary files are provided.
 + ``bwa_index``: A folder containing the BWA index files
 + ``female``: A folder containing the female sample files.
 

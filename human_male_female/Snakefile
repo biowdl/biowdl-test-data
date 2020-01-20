@@ -18,8 +18,8 @@ rule all:
     input:
          "male/male.bam",
          "female/female.bam",
-         "reference.fa.fai",
-         "reference.dict"
+         "reference/reference.fa.fai",
+         "reference/reference.dict"
 
 rule download_hg38_chromosome:
     params:
@@ -62,7 +62,7 @@ rule create_formatted_reference:
     input:
         "temp/reference_raw.fa"
     output:
-        "reference.fa"
+        "reference/reference.fa"
     singularity:
         CONTAINERS["biopython"]
     shell:
@@ -70,9 +70,9 @@ rule create_formatted_reference:
 
 rule create_reference_fasta_index:
     input:
-        "reference.fa"
+        "reference/reference.fa"
     output:
-        "reference.fa.fai"
+        "reference/reference.fa.fai"
     singularity:
         CONTAINERS["samtools"]
     shell:
@@ -80,9 +80,9 @@ rule create_reference_fasta_index:
 
 rule create_reference_sequence_dict:
     input:
-        "reference.fa"
+        "reference/reference.fa"
     output:
-        "reference.dict"
+        "reference/reference.dict"
     singularity:
         CONTAINERS["picard"]
     shell:
@@ -92,7 +92,7 @@ rule create_reference_sequence_dict:
 
 rule create_unmasked_y:
     input:
-        "reference.fa"
+        "reference/reference.fa"
     output:
         temp("temp/unmasked_y.fa")
     singularity:
@@ -162,7 +162,7 @@ rule gzip_generated_fastq:
 
 rule index_reference:
     input:
-        "reference.fa"
+        "reference/reference.fa"
     output:
         "bwa_index/reference.fa.amb",
         "bwa_index/reference.fa.ann",
