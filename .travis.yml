@@ -11,13 +11,13 @@ install:
   - >-
     bash -c '
     export VERSION=3.5.2 &&
-    wget https://github.com/sylabs/singularity/releases/download/v${VERSION}/singularity-${VERSION}.tar.gz &&
-    tar -xzf singularity-${VERSION}.tar.gz &&
+    git clone -b v$VERSION https://github.com/sylabs/singularity.git &&
     cd singularity &&
     ./mconfig &&
     make -C ./builddir &&
     sudo make -C ./builddir install
     '
+  - singularity version
   - sudo apt install python3 python3-pip python3-setuptools
   - sudo pip3 install snakemake
 
