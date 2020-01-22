@@ -1,0 +1,42 @@
+language: go
+go:
+  - "1.x"
+
+dist: bionic
+install:
+  - sudo apt update
+  - >-
+    sudo apt install build-essential uuid-dev libgpgme-dev squashfs-tools
+    libseccomp-dev wget pkg-config git cryptsetup-bin
+  - >-
+    bash -c '
+    export VERSION=3.5.2 &&
+    git clone -b v$VERSION https://github.com/sylabs/singularity.git &&
+    cd singularity &&
+    ./mconfig &&
+    make -C ./builddir &&
+    sudo make -C ./builddir install
+    '
+  - singularity version
+  - sudo apt install python3 python3-pip python3-setuptools
+  - sudo pip3 install snakemake
+
+script:
+  # Delete all data and recreate again with snakemake.
+  - >-
+    bash -c "cd $TEST_DATA &&
+    snakemake --delete-all-output &&
+    snakemake --use-singularity --singularity-args \'-C\' --show-failed-logs
+    --printshellcmds
+    "
+  # Check if things have changed. This should not be the case with reproducible data.
+  - git diff --exit-code
+  - bash -c 'cd $TEST_DATA && md5sum -c MD5SUMS'
+
+matrix:
+  include:
+    - env: TEST_DATA=human_male_female
+      before_install:
+        # Necessary to write protect all files that need to be downloaded.
+        # Downloading files in CI can cause intermittent issues.
+        - bash -c 'chmod 444 human_male_female/GRCh38/*'

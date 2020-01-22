@@ -1,0 +1,223 @@
+CONTAINERS = {
+    # Contains curl based on debian-slim
+    "curl": "docker://biowdl/curl@sha256:3b0477d934547d8c274c9834372e791342d2a97409eedde40e786c7782721f53",
+    # Debian:buster-slim pinned at a hash.
+    "debian": "docker://debian@sha256:a467ec784be2fa9d9e1868c4bf0c5c5792750453db3e5cd1d726a7243536a54f",
+    # Bedtools 2.29 does weird things to the name of the contig. 2.27 acts normally.
+    "bedtools": "docker://quay.io/biocontainers/bedtools:2.27.1--he860b03_3",
+    "biopython": "docker://quay.io/biocontainers/biopython:1.70--np112py36_1",
+    # Use custom container now until biocontainer becomes available.
+    "biotdg": "docker://biowdl/biotdg:0.1.0",
+    # Use a container with BWA and picard
+    "bwa": "docker://quay.io/biocontainers/mulled-v2-002f51ea92721407ef440b921fb5940f424be842:43ec6124f9f4f875515f9548733b8b4e5fed9aa6-0",
+    "samtools": "docker://quay.io/biocontainers/samtools:1.2-0",
+    "picard": "docker://quay.io/biocontainers/picard:2.21.6--0",
+    "tabix": "docker://quay.io/biocontainers/tabix:0.2.6--ha92aebf_0"
+}
+
+rule all:
+    input:
+         "male/male.bam",
+         "female/female.bam",
+         "reference/reference.fa.fai",
+         "reference/reference.dict",
+         "expected.vcf.gz.tbi"
+
+rule download_hg38_chromosome:
+    params:
+        # Download the GRCh38 genome hard-masked from ensembl.
+        url="ftp://ftp.ensembl.org/pub/release-98/fasta/homo_sapiens/dna/Homo_sapiens.GRCh38.{chrom}.fa.gz"
+    output:
+        protected("GRCh38/Homo_sapiens.GRCh38.{chrom}.fa.gz")
+    singularity:
+        CONTAINERS["curl"]
+    shell:
+        "curl -s -o {output} {params.url}"
+
+rule concatenate_ref_genome:
+    input:
+        "GRCh38/Homo_sapiens.GRCh38.dna.chromosome.22.fa.gz",
+        "GRCh38/Homo_sapiens.GRCh38.dna.chromosome.X.fa.gz",
+        "GRCh38/Homo_sapiens.GRCh38.dna.chromosome.Y.fa.gz",
+    output:
+        temp("temp/22XY.fa")
+    singularity:
+        CONTAINERS["debian"]
+    shell:
+        "gzip -cd {input} > {output}"
+
+rule create_raw_small_reference:
+    input:
+        hg38="temp/22XY.fa",
+        bed="extract.bed"
+    output:
+         fasta=temp("temp/reference_raw.fa"),
+         fai=temp("temp/22XY.fa.fai")
+    singularity:
+        CONTAINERS["bedtools"]
+    shell:
+         # Use -name to get the name from the bed file.
+         "bedtools getfasta -name -fi {input.hg38} -bed {input.bed} "
+         "> {output.fasta}"
+
+rule create_formatted_reference:
+    input:
+        "temp/reference_raw.fa"
+    output:
+        "reference/reference.fa"
+    singularity:
+        CONTAINERS["biopython"]
+    shell:
+        "python select_chromosomes.py {input} > {output}"
+
+rule create_reference_fasta_index:
+    input:
+        "reference/reference.fa"
+    output:
+        "reference/reference.fa.fai"
+    singularity:
+        CONTAINERS["samtools"]
+    shell:
+        "samtools faidx {input}"
+
+rule create_reference_sequence_dict:
+    input:
+        "reference/reference.fa"
+    output:
+        "reference/reference.dict"
+    singularity:
+        CONTAINERS["picard"]
+    shell:
+        "picard CreateSequenceDictionary "
+        "R={input} O={output} "
+        "URI={input}"
+
+rule create_unmasked_y:
+    input:
+        "reference/reference.fa"
+    output:
+        temp("temp/unmasked_y.fa")
+    singularity:
+        CONTAINERS["biopython"]
+    shell:
+        "python translocate.py {input} X:0-5000 Y:0-5000 > {output}"
+
+rule select_22_and_x:
+    input:
+        "temp/reference_raw.fa"
+    output:
+        temp("temp/22_and_x.fa")
+    singularity:
+        CONTAINERS["biopython"]
+    shell:
+        "python select_chromosomes.py {input} 22 X > {output}"
+
+rule create_reference_unmasked_y:
+    input:
+        "temp/22_and_x.fa",
+         "temp/unmasked_y.fa"
+    output:
+        temp("temp/reference_unmasked_y.fa")
+    singularity:
+        CONTAINERS["debian"]
+    shell:
+        "cat {input} > {output}"
+
+
+rule create_sample_data:
+    input:
+         reference="temp/reference_unmasked_y.fa",
+         vcf="mutations.vcf",
+         ploidy_file="{sample}.ploidy.tsv"
+    output:
+        temp("{sample}/{sample}.fasta"),
+        temp("{sample}/{sample}.bwa.read1.fastq"),
+        temp("{sample}/{sample}.bwa.read2.fastq"),
+        temp("{sample}/{sample}.bfast.fastq"),
+        temp("{sample}/{sample}.mutations.txt"),
+        temp("{sample}/{sample}.mutations.vcf"),
+    singularity:
+        CONTAINERS["biotdg"]
+    shell:
+         "biotdg "
+         "--reference {input.reference} "
+         "--vcf {input.vcf} "
+         "-p {input.ploidy_file} "
+         "-s {wildcards.sample} "
+         "-o {wildcards.sample}/ "
+         "-l 150 "
+         "-C 50 "
+         "-e 0.001 "
+         "-E 0.001 "
+         "-n 5"
+
+rule gzip_generated_fastq:
+    input:
+        "{sample}/{sample}.bwa.read{number}.fastq"
+    output:
+          "{sample}/{sample}_R{number}.fastq.gz"
+    singularity:
+        CONTAINERS["debian"]
+    shell:
+         # Use -n flag so timestamp is not included for reproducibility.
+         "gzip -n -c {input} > {output}"
+
+rule index_reference:
+    input:
+        "reference/reference.fa"
+    output:
+        "bwa_index/reference.fa.amb",
+        "bwa_index/reference.fa.ann",
+        "bwa_index/reference.fa.bwt",
+        "bwa_index/reference.fa.pac",
+        "bwa_index/reference.fa.sa",
+    singularity:
+        CONTAINERS["bwa"]
+    shell:
+        "bwa index -p bwa_index/reference.fa {input}"
+
+rule align_reads:
+    input:
+         R1="{sample}/{sample}_R1.fastq.gz",
+         R2="{sample}/{sample}_R2.fastq.gz",
+         index_files=["bwa_index/reference.fa.amb",
+                      "bwa_index/reference.fa.ann",
+                      "bwa_index/reference.fa.bwt",
+                      "bwa_index/reference.fa.pac",
+                      "bwa_index/reference.fa.sa"]
+    output:
+          bam="{sample}/{sample}.bam",
+          bai="{sample}/{sample}.bai"
+    params:
+        readgroup_header=r"@RG\tID:{sample}-lib1-rg1\tLB:lib1"
+                         r"\tSM:{sample}\tPL:illumina",
+    singularity:
+        CONTAINERS["bwa"]
+    shell:
+         "bwa mem "
+         "-R '{params.readgroup_header}' "
+         "bwa_index/reference.fa {input.R1} {input.R2} | "
+         "picard SortSam INPUT=/dev/stdin "
+         "OUTPUT={output.bam} "
+         "SORT_ORDER=coordinate "
+         "CREATE_INDEX=true"
+
+rule block_gzip:
+    input:
+         "{uncompressed}"
+    output:
+         "{uncompressed}.gz"
+    singularity:
+         CONTAINERS["tabix"]
+    shell:
+         "bgzip -c {input} > {output}"
+
+rule tabix:
+    input:
+        "{notindexed}"
+    output:
+        "{notindexed}.tbi"
+    singularity:
+         CONTAINERS["tabix"]
+    shell:
+         "tabix -p vcf {input}"
