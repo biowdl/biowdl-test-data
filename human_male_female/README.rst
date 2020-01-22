@@ -12,7 +12,7 @@ Files for testing
 
 + ``reference``: A folder containing a reference genome. With chromosomes ``22``, ``X`` and
   ``Y``. Fasta index and sequence dictionary files are provided.
-+ ``bwa_index``: A folder containing the BWA index files
++ ``bwa_index``: A folder containing the BWA index files.
 + ``female``: A folder containing the female sample files.
 
   + ``female_R1.fastq.gz`` and ``female_R2.fastq.gz``: fastq files.
