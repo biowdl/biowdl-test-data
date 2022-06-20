@@ -4,6 +4,8 @@ human_male_female
 These data are created for pipelines that correctly use the ploidy of the X and
 Y chromosome.
 
+The data can be regenerated reproducible using snakemake.
+
 Files
 +++++
 
